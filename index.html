@@ -23,10 +23,10 @@ td:first-child,th:first-child{text-align:left}.neg{color:var(--red)}.pos{color:v
 </style></head><body>
 <div id="gate"><form id="f"><h1 style="margin-bottom:14px">Enter password</h1><input id="pw" type="password" inputmode="numeric" autofocus><button>Open</button><div id="err" class="muted" style="margin-top:10px"></div></form></div>
 <div id="app" hidden>
-<div class="top"><div class="wrap"><h1>TRADING INCOME</h1><div class="big" id="ytd"></div><div class="muted" id="notes"></div></div></div>
+<div class="top"><div class="wrap"><h1>TRADING INCOME</h1><div class="muted" style="letter-spacing:.18em;font-weight:700;margin-top:8px">ALL-TIME INCOME</div><div class="big" id="ytd" style="font-size:48px"></div><div class="cards" id="hero" style="margin-top:10px"></div><div class="muted" id="fn"></div><div class="muted" id="notes"></div></div></div>
 <main class="wrap" style="padding-bottom:40px">
-<div class="cards" id="cards" style="margin-top:18px"></div>
-<h2>OPTIONS — PUTS VS CALLS BY MONTH</h2><div class="grid2"><div class="chartbox"><canvas id="cOpt"></canvas></div><div class="scroll" id="tOpt"></div></div>
+
+<h2>BY YEAR</h2><div class="scroll" id="tYr"></div><h2>2026 SUMMARY</h2><div class="cards" id="cards2"></div><h2>OPTIONS — PUTS VS CALLS BY MONTH</h2><div class="grid2"><div class="chartbox"><canvas id="cOpt"></canvas></div><div class="scroll" id="tOpt"></div></div>
 <h2>DIVIDENDS</h2><div class="grid2"><div class="chartbox"><canvas id="cDiv"></canvas></div><div class="scroll" id="tDivM"></div></div>
 <div class="scroll" id="tDivT" style="margin-top:14px"></div>
 <h2>OPEN POSITIONS</h2><div class="grid2"><div class="chartbox"><canvas id="cSec"></canvas></div><div class="scroll" id="tSec"></div></div>
@@ -46,12 +46,19 @@ const cl=v=>v<0?'neg':(v>0?'pos':'');
 const mname=m=>{const[y,mo]=m.split('-');return new Date(y,mo-1).toLocaleString('en',{month:'short'})+' '+y};
 function table(id,head,rows,foot){let h='<table><tr>'+head.map(x=>'<th>'+x+'</th>').join('')+'</tr>';
  for(const r of rows.concat(foot?[foot]:[]))h+='<tr'+(r===foot?' style="font-weight:700"':'')+'>'+r.map(c=>typeof c=='number'?`<td class="${cl(c)}">${fm(c)}</td>`:`<td>${c??''}</td>`).join('')+'</tr>';$(id).innerHTML=h+'</table>';}
+const sgn=v=>(v>0?'+':'')+fm(v);
+function count(el,v){const t0=performance.now();el.className=(el.className.replace(/\b(pos|neg)\b/g,'')+' '+cl(v)).trim();
+ (function f(t){const p=Math.min(1,(t-t0)/1500),e=1-Math.pow(1-p,3);el.textContent=sgn(v*e);if(p<1)requestAnimationFrame(f);else el.textContent=sgn(v);})(t0);}
 const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
 function render(d){
  const om=d.options_monthly,netP=sum(om,x=>x.put),netC=sum(om,x=>x.call),div=sum(d.div_by_month,x=>x.div),int=sum(d.div_by_month,x=>x.interest),wh=sum(d.div_by_month,x=>x.withheld);
- const ytd=netP+netC+div+int; $('ytd').textContent='YTD INCOME '+fm(ytd); $('notes').innerHTML=d.notes.slice(1).join('<br>');
+ const Y=d.years||[],aS=sum(Y,x=>x.stocks),aO=sum(Y,x=>x.options),aD=sum(Y,x=>x.divint),aT=aS+aO+aD;
+ count($('ytd'),aT);$('hero').innerHTML=[['Stocks','hS',aS],['Options','hO',aO],['Dividends + Interest','hD',aD]].map(([l,id])=>`<div class="card"><div class="l">${l}</div><div class="v" id="${id}"></div></div>`).join('');
+ count($('hS'),aS);count($('hO'),aO);count($('hD'),aD);
+ const ns=Y.filter(x=>x.has&&!x.split&&x.stocks).map(x=>x.year);if(ns.length)$('fn').textContent='* some years not split ('+ns.join(', ')+'): realized amount shown under Stocks';
+ table('tYr',['Year','Stocks','Options','Div + Interest','Total','Notes'],Y.map(x=>[String(x.year)+(x.has&&!x.split&&x.stocks?'*':''),x.stocks,x.options,x.divint,x.stocks+x.options+x.divint,x.has?x.notes:'no data']),['ALL-TIME',aS,aO,aD,aT,'']); $('notes').innerHTML=d.notes.slice(1).join('<br>');
  const mv=sum(d.positions,x=>x.mv),cost=sum(d.positions,x=>x.cost);
- $('cards').innerHTML=[['Net puts',netP],['Net calls',netC],['Dividends (gross)',div],['Interest',int],['Tax withheld',wh],['Portfolio value',mv],['Unrealized P/L',mv-cost],['Short put premium open',sum(d.short_puts,x=>x.prem)]]
+ $('cards2').innerHTML=[['Net puts',netP],['Net calls',netC],['Dividends (gross)',div],['Interest',int],['Tax withheld',wh],['Portfolio value',mv],['Unrealized P/L',mv-cost],['Short put premium open',sum(d.short_puts,x=>x.prem)]]
   .map(([l,v])=>`<div class="card"><div class="l">${l}</div><div class="v ${cl(v)}">${fm(v)}</div></div>`).join('');
  const t=d.options_totals;
  table('tOpt',['Month','Net Puts','Net Calls','Total'],om.map(x=>[mname(x.month),x.put,x.call,x.put+x.call]),['TOTAL',netP,netC,netP+netC]);
