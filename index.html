@@ -64,7 +64,8 @@ $('yrPills').onclick=e=>{const b=e.target.closest('.pill');if(b)selY(b.dataset.y
  $('cards2').innerHTML=[['Net puts',netP],['Net calls',netC],['Dividends (gross)',div],['Interest',int],['Tax withheld',wh],['Portfolio value',mv],['Unrealized P/L',mv-cost],['Short put premium open',sum(d.short_puts,x=>x.prem)]]
   .map(([l,v])=>`<div class="card"><div class="l">${l}</div><div class="v ${cl(v)}">${fm(v)}</div></div>`).join('');
  const t=d.options_totals;
- table('tOpt',['Month','Net Puts','Net Calls','Total'],om.map(x=>[mname(x.month),x.put,x.call,x.put+x.call]),['TOTAL',netP,netC,netP+netC]);
+ table('tOpt',['Month','Contracts Sold','Net Puts','Net Calls','Total'],om.map(x=>[mname(x.month),String(Math.round(x.ct||0)),x.put,x.call,x.put+x.call]),['TOTAL',String(Math.round(sum(om,x=>x.ct||0))),netP,netC,netP+netC]);
+ if(d.closed_opts&&d.closed_opts.length){const co=d.closed_opts;$('tOpt').parentElement.insertAdjacentHTML('afterend','<h2>CLOSED OPTIONS 2026 — BY CONTRACT (SCHWAB REALIZED)</h2><div class="scroll" id="tCO"></div>');table('tCO',['Contract','Put/Call','Expiration','Contracts','Proceeds','Cost Basis','Realized G/L','Closed'],co.map(x=>[x.c,x.t,x.exp,String(Math.round(x.ct)),x.pr,x.cb,x.gl,x.cl]),['TOTAL','','',String(Math.round(sum(co,x=>x.ct))),sum(co,x=>x.pr),sum(co,x=>x.cb),sum(co,x=>x.gl),'']);}
  $('tOpt').innerHTML+=`<p class="muted">Put premium sold ${fm(t.put_sold)} · buy-backs ${fm(t.put_bb)} · Call premium sold ${fm(t.call_sold)} · buy-backs ${fm(t.call_bb)}</p>`;
  new Chart($('cOpt'),{type:'bar',data:{labels:om.map(x=>mname(x.month)),datasets:[{label:'Puts',data:om.map(x=>x.put),backgroundColor:'#1e3a8a'},{label:'Calls',data:om.map(x=>x.call),backgroundColor:'#60a5fa'}]}});
  const dm=d.div_by_month;
