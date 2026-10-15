@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f3f4f6;--line:#d1d5db;--gold:#1e3a8a;--txt:#111827;--muted:#6b7280;--red:#b91c1c;--green:#15803d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px Inter,system-ui,sans-serif}
+h1,h2{font-family:Oswald,sans-serif;letter-spacing:.04em;margin:0;color:var(--gold)}h2{font-size:18px;margin:28px 0 10px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px}.top{background:#fff;border-bottom:1px solid var(--line);padding:18px 0}
+.big{font:700 32px Oswald;color:var(--gold)}.muted{color:var(--muted);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}.card .l{font:700 11px Inter;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.card .v{font:700 24px Oswald;margin-top:4px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:7px 10px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap}th{background:var(--gold);color:#fff;font-weight:600}
+td:first-child,th:first-child{text-align:left}.neg{color:var(--red)}.pos{color:var(--green)}.scroll{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.chartbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+#gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:9}
+#gate form{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center}
+#gate input{font:18px Inter;padding:8px 12px;border:1px solid var(--line);border-radius:8px;width:180px;text-align:center}
+#gate button{margin-left:6px;font:600 15px Inter;padding:9px 16px;border:0;border-radius:8px;background:var(--gold);color:#fff;cursor:pointer}
+</style></head><body>
+<div id="gate"><form id="f"><h1 style="margin-bottom:14px">Enter password</h1><input id="pw" type="password" inputmode="numeric" autofocus><button>Open</button><div id="err" class="muted" style="margin-top:10px"></div></form></div>
+<div id="app" hidden>
+<div class="top"><div class="wrap"><h1>TRADING INCOME</h1><div class="big" id="ytd"></div><div class="muted" id="notes"></div></div></div>
+<main class="wrap" style="padding-bottom:40px">
+<div class="cards" id="cards" style="margin-top:18px"></div>
+<h2>OPTIONS — PUTS VS CALLS BY MONTH</h2><div class="grid2"><div class="chartbox"><canvas id="cOpt"></canvas></div><div class="scroll" id="tOpt"></div></div>
+<h2>DIVIDENDS</h2><div class="grid2"><div class="chartbox"><canvas id="cDiv"></canvas></div><div class="scroll" id="tDivM"></div></div>
+<div class="scroll" id="tDivT" style="margin-top:14px"></div>
+<h2>OPEN POSITIONS</h2><div class="grid2"><div class="chartbox"><canvas id="cSec"></canvas></div><div class="scroll" id="tSec"></div></div>
+<div class="scroll" id="tPos" style="margin-top:14px"></div>
+<h2>OPEN SHORT PUTS</h2><div class="scroll" id="tSP"></div>
+<div id="years"></div><p class="muted" id="gen"></p>
+</main></div>
+<script>
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function decrypt(pw){const e=await (await fetch('data.enc.json',{cache:'no-store'})).json();
+ const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+ const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(e.salt),iterations:e.iter,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+ return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.iv)},key,b64(e.ct))));}
+const $=id=>document.getElementById(id);
+const fm=v=>(v<0?'-':'')+'$'+Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const cl=v=>v<0?'neg':(v>0?'pos':'');
+const mname=m=>{const[y,mo]=m.split('-');return new Date(y,mo-1).toLocaleString('en',{month:'short'})+' '+y};
+function table(id,head,rows,foot){let h='<table><tr>'+head.map(x=>'<th>'+x+'</th>').join('')+'</tr>';
+ for(const r of rows.concat(foot?[foot]:[]))h+='<tr'+(r===foot?' style="font-weight:700"':'')+'>'+r.map(c=>typeof c=='number'?`<td class="${cl(c)}">${fm(c)}</td>`:`<td>${c??''}</td>`).join('')+'</tr>';$(id).innerHTML=h+'</table>';}
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+function render(d){
+ const om=d.options_monthly,netP=sum(om,x=>x.put),netC=sum(om,x=>x.call),div=sum(d.div_by_month,x=>x.div),int=sum(d.div_by_month,x=>x.interest),wh=sum(d.div_by_month,x=>x.withheld);
+ const ytd=netP+netC+div+int; $('ytd').textContent='YTD INCOME '+fm(ytd); $('notes').innerHTML=d.notes.slice(1).join('<br>');
+ const mv=sum(d.positions,x=>x.mv),cost=sum(d.positions,x=>x.cost);
+ $('cards').innerHTML=[['Net puts',netP],['Net calls',netC],['Dividends (gross)',div],['Interest',int],['Tax withheld',wh],['Portfolio value',mv],['Unrealized P/L',mv-cost],['Short put premium open',sum(d.short_puts,x=>x.prem)]]
+  .map(([l,v])=>`<div class="card"><div class="l">${l}</div><div class="v ${cl(v)}">${fm(v)}</div></div>`).join('');
+ const t=d.options_totals;
+ table('tOpt',['Month','Net Puts','Net Calls','Total'],om.map(x=>[mname(x.month),x.put,x.call,x.put+x.call]),['TOTAL',netP,netC,netP+netC]);
+ $('tOpt').innerHTML+=`<p class="muted">Put premium sold ${fm(t.put_sold)} · buy-backs ${fm(t.put_bb)} · Call premium sold ${fm(t.call_sold)} · buy-backs ${fm(t.call_bb)}</p>`;
+ new Chart($('cOpt'),{type:'bar',data:{labels:om.map(x=>mname(x.month)),datasets:[{label:'Puts',data:om.map(x=>x.put),backgroundColor:'#1e3a8a'},{label:'Calls',data:om.map(x=>x.call),backgroundColor:'#60a5fa'}]}});
+ const dm=d.div_by_month;
+ table('tDivM',['Month','Dividends','Interest','Withheld','Net'],dm.map(x=>[mname(x.month),x.div,x.interest,x.withheld,x.div+x.interest+x.withheld]),['TOTAL',div,int,wh,div+int+wh]);
+ new Chart($('cDiv'),{type:'bar',data:{labels:dm.map(x=>mname(x.month)),datasets:[{label:'Dividends',data:dm.map(x=>x.div),backgroundColor:'#15803d'},{label:'Interest',data:dm.map(x=>x.interest),backgroundColor:'#86efac'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
+ table('tDivT',['Ticker','Security','Gross Dividends'],d.div_by_ticker.map(x=>[x.ticker,x.name,x.gross]),['TOTAL','',div]);
+ const sec={};d.positions.forEach(p=>sec[p.sector]=(sec[p.sector]||0)+p.mv);const se=Object.entries(sec).sort((a,b)=>b[1]-a[1]);
+ table('tSec',['Sector','Market Value','%'],se.map(([s,v])=>[s,v,(v/mv*100).toFixed(1)+'%']),['TOTAL',mv,'100%']);
+ new Chart($('cSec'),{type:'pie',data:{labels:se.map(x=>x[0]),datasets:[{data:se.map(x=>x[1]),backgroundColor:['#1e3a8a','#2563eb','#60a5fa','#15803d','#86efac','#f59e0b','#b91c1c','#7c3aed','#6b7280','#0891b2']}]},options:{plugins:{legend:{position:'right'}}}});
+ table('tPos',['Ticker','Sector','Shares','Price','Cost Basis','Market Value','Unrealized P/L','% P/L','% Port'],d.positions.map(p=>[p.ticker,p.sector,p.shares.toLocaleString(),'$'+p.price.toFixed(2),p.cost,p.mv,p.mv-p.cost,((p.mv/p.cost-1)*100).toFixed(1)+'%',(p.mv/mv*100).toFixed(1)+'%']),['TOTAL','','','',cost,mv,mv-cost,((mv/cost-1)*100).toFixed(1)+'%','100%']);
+ if(d.cash!=null)$('tPos').innerHTML+=`<p class="muted">Cash balance: ${fm(d.cash)}</p>`;
+ const sp=d.short_puts;
+ table('tSP',['Contract','Expiration','Contracts','Mark','Premium','Cost to Close','Unrealized P/L','Cash Secured'],sp.map(x=>[x.contract,x.exp,x.ct,'$'+x.mark.toFixed(2),x.prem,x.close,x.prem-x.close,x.secured]),['TOTAL','',sum(sp,x=>x.ct),'',sum(sp,x=>x.prem),sum(sp,x=>x.close),sum(sp,x=>x.prem-x.close),sum(sp,x=>x.secured)]);
+ d.by_year.forEach((y,i)=>{$('years').insertAdjacentHTML('beforeend',`<h2>${y.title.toUpperCase()}</h2><div class="scroll" id="y${i}"></div>`);table('y'+i,y.rows[0].map(String),y.rows.slice(1));});
+ $('gen').textContent='Updated '+d.generated;}
+$('f').onsubmit=async e=>{e.preventDefault();try{const d=await decrypt($('pw').value);sessionStorage.setItem('tp',$('pw').value);$('gate').remove();$('app').hidden=false;render(d);}catch(x){$('err').textContent='Wrong password';}};
+if(sessionStorage.getItem('tp')){$('pw').value=sessionStorage.getItem('tp');$('f').requestSubmit();}
+</script></body></html>
