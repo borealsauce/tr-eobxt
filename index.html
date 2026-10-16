@@ -26,12 +26,15 @@ td:first-child,th:first-child{text-align:left}.neg{color:var(--red)}.pos{color:v
 <div class="top"><div class="wrap"><h1>TRADING INCOME</h1><div class="muted" style="letter-spacing:.18em;font-weight:700;margin-top:8px">ALL-TIME INCOME</div><div class="big" id="ytd" style="font-size:48px"></div><div class="cards" id="hero" style="margin-top:10px"></div><div class="muted" id="fn"></div><div class="muted" id="notes"></div></div></div>
 <main class="wrap" style="padding-bottom:40px">
 
-<h2>BY YEAR</h2><div class="pills" id="yrPills"></div><div class="cards" id="yrCards" hidden style="margin-bottom:14px"></div><div class="byw"><div class="scroll" id="tYr"></div><div class="byc" id="yrChart"></div></div><h2>2026 SUMMARY</h2><div class="cards" id="cards2"></div><h2>OPEN POSITIONS</h2><div class="grid2"><div class="chartbox"><canvas id="cSec"></canvas></div><div class="scroll" id="tSec"></div></div><h2>OPEN SHORT PUTS</h2><div class="scroll" id="tSP"></div><h2>OPTIONS — PUTS VS CALLS BY MONTH</h2><div class="grid2"><div class="chartbox"><canvas id="cOpt"></canvas></div><div class="scroll" id="tOpt"></div></div>
+<h2>BY YEAR</h2><div class="pills" id="yrPills"></div><div class="cards" id="yrCards" hidden style="margin-bottom:14px"></div><div class="byw"><div class="scroll" id="tYr"></div><div class="byc" id="yrChart"></div></div>
+<h2>2026 SUMMARY</h2><div class="cards" id="cards2"></div>
+<h2>OPEN POSITIONS</h2><div class="scroll" id="tPos"></div>
+<h2>OPEN SHORT PUTS</h2><div class="scroll" id="tSP"></div>
+<h2>OPTIONS — PUTS VS CALLS BY MONTH</h2><div class="grid2"><div class="chartbox"><canvas id="cOpt"></canvas></div><div class="scroll" id="tOpt"></div></div>
+<h2>OPEN POSITIONS — BY SECTOR</h2><div class="grid2"><div class="chartbox"><canvas id="cSec"></canvas></div><div class="scroll" id="tSec"></div></div>
 <h2>DIVIDENDS</h2><div class="grid2"><div class="chartbox"><canvas id="cDiv"></canvas></div><div class="scroll" id="tDivM"></div></div>
 <div class="scroll" id="tDivT" style="margin-top:14px"></div>
-
-<div class="scroll" id="tPos" style="margin-top:14px"></div>
-
+<div id="closedOpts"></div>
 <div id="years"></div><p class="muted" id="gen"></p>
 </main></div>
 <script>
@@ -65,7 +68,7 @@ $('yrPills').onclick=e=>{const b=e.target.closest('.pill');if(b)selY(b.dataset.y
   .map(([l,v])=>`<div class="card"><div class="l">${l}</div><div class="v ${cl(v)}">${fm(v)}</div></div>`).join('');
  const t=d.options_totals;
  table('tOpt',['Month','Contracts Sold','Net Puts','Net Calls','Total'],om.map(x=>[mname(x.month),String(Math.round(x.ct||0)),x.put,x.call,x.put+x.call]),['TOTAL',String(Math.round(sum(om,x=>x.ct||0))),netP,netC,netP+netC]);
- if(d.closed_opts&&d.closed_opts.length){const co=d.closed_opts;document.querySelector('h2').parentElement.insertAdjacentHTML('beforeend','<h2>CLOSED OPTIONS 2026 — BY CONTRACT (SCHWAB REALIZED)</h2><div class="scroll" id="tCO"></div>');table('tCO',['Contract','Put/Call','Expiration','Contracts','Proceeds','Cost Basis','Realized G/L','Closed'],co.map(x=>[x.c,x.t,x.exp,String(Math.round(x.ct)),x.pr,x.cb,x.gl,x.cl]),['TOTAL','','',String(Math.round(sum(co,x=>x.ct))),sum(co,x=>x.pr),sum(co,x=>x.cb),sum(co,x=>x.gl),'']);}
+ if(d.closed_opts&&d.closed_opts.length){const co=d.closed_opts;$('closedOpts').insertAdjacentHTML('beforeend','<h2>CLOSED OPTIONS 2026 — BY CONTRACT (SCHWAB REALIZED)</h2><div class="scroll" id="tCO"></div>');table('tCO',['Contract','Put/Call','Expiration','Contracts','Proceeds','Cost Basis','Realized G/L','Closed'],co.map(x=>[x.c,x.t,x.exp,String(Math.round(x.ct)),x.pr,x.cb,x.gl,x.cl]),['TOTAL','','',String(Math.round(sum(co,x=>x.ct))),sum(co,x=>x.pr),sum(co,x=>x.cb),sum(co,x=>x.gl),'']);}
  $('tOpt').innerHTML+=`<p class="muted">Put premium sold ${fm(t.put_sold)} · buy-backs ${fm(t.put_bb)} · Call premium sold ${fm(t.call_sold)} · buy-backs ${fm(t.call_bb)}</p>`;
  new Chart($('cOpt'),{type:'bar',data:{labels:om.map(x=>mname(x.month)),datasets:[{label:'Puts',data:om.map(x=>x.put),backgroundColor:'#1e3a8a'},{label:'Calls',data:om.map(x=>x.call),backgroundColor:'#60a5fa'}]}});
  const dm=d.div_by_month;
