@@ -40,7 +40,7 @@ tr.ft td,tr:last-child td{font-weight:700}
 #gate{background:var(--bg)}#gate input{background:#0c0c0c;color:var(--txt);border:1px solid var(--gb)}#gate button{background:var(--gold);color:#050505;border-radius:999px;font-weight:700}
 .hdl{color:var(--gold)}.muted{color:var(--muted)}
 #wl .card div[style*="border-bottom"]{border-bottom-color:#262626!important}
-</style></head><body>
+</style><style id="signc">.card .v.pos,.big.pos,td.pos,.pos{color:var(--green)!important}.card .v.neg,.big.neg,td.neg,.neg{color:var(--red)!important}.big.pos{text-shadow:0 0 18px #22c55e40}.big.neg{text-shadow:0 0 18px #ff2d3a40}</style></head><body>
 <div id="gate"><form id="f"><h1 style="margin-bottom:14px">Enter password</h1><input id="pw" type="password" inputmode="numeric" autofocus><button>Open</button><div id="err" class="muted" style="margin-top:10px"></div></form></div>
 <div id="app" hidden>
 <div class="top"><div class="wrap"><h1>TRADING INCOME</h1><div class="muted" style="letter-spacing:.18em;font-weight:700;margin-top:8px">ALL-TIME INCOME</div><div class="big" id="ytd" style="font-size:48px"></div><div class="cards" id="hero" style="margin-top:10px"></div><div class="muted" id="fn"></div><div class="muted" id="notes"></div></div></div>
@@ -143,4 +143,16 @@ function setup(){const m=document.querySelector('main');if(m.dataset.dd)return;m
  m.addEventListener('pointerup',end);m.addEventListener('pointercancel',end);
  window.__resetLayout=r.onclick;}
 const iv=setInterval(()=>{const a=document.getElementById('app');if(a&&!a.hidden&&document.querySelector('#tPos tr')){clearInterval(iv);setTimeout(setup,50);}},200);
+})();</script><script>(function(){
+const EX=/cost basis|market value|portfolio value|shares|contracts|price|mark|lots|strike|cash secured|cost to close|% port|proceeds|expiration|year|month|ticker|sector|name|contract|security|closed|put\/call|underlying|source|^%$/i;
+const num=t=>{t=(t||'').replace(/[▲▼†]/g,'');const m=t.match(/[-−+]?\s*\$?\s*\(?[\d,]*\.?\d+/);if(!m)return null;let s=m[0].replace(/[\s$,(]/g,'').replace('−','-');const v=parseFloat(s);return isNaN(v)?null:v;};
+const set=(el,v)=>{el.classList.remove('pos','neg');if(v>0)el.classList.add('pos');else if(v<0)el.classList.add('neg');};
+function paint(){
+ document.querySelectorAll('table').forEach(tb=>{const hr=tb.querySelector('tr');if(!hr)return;const H=[...hr.children].map(x=>x.textContent.replace(/[▲▼]/g,'').trim());
+  const OK=/premium|dividend|interest|withheld|net|realized|unrealized|day gain|gain|p\/l|total|options|stocks|trading/i;tb.querySelectorAll('tr').forEach((tr,ri)=>{if(ri===0)return;[...tr.children].forEach((td,i)=>{const hh=H[i]||'';if(i===0||(EX.test(hh)&&!/premium|dividend|interest|withheld|unrealized|realized|day gain|net/i.test(hh)))return;const v=num(td.textContent);if(v==null)return;set(td,v);td.querySelectorAll('span').forEach(s=>{const q=num(s.textContent);if(q!=null)set(s,q);});});});});
+ document.querySelectorAll('.card').forEach(c=>{const l=c.querySelector('.l');const v=c.querySelector('.v');if(!v)return;const lab=l?l.textContent:'';if(EX.test(lab)&&!/premium/i.test(lab))return;const n=num(v.childNodes[0]?v.childNodes[0].textContent:v.textContent);if(n==null)return;set(v,n);});
+ const y=document.getElementById('ytd');if(y){const n=num(y.textContent);if(n!=null)set(y,n);}
+}
+let t=null;const go=()=>{clearTimeout(t);t=setTimeout(paint,30);};
+new MutationObserver(go).observe(document.body,{childList:true,subtree:true,characterData:true});window.__paint=paint;go();
 })();</script></body></html>
