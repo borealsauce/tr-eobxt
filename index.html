@@ -54,7 +54,7 @@ function count(el,v){const t0=performance.now();el.className=(el.className.repla
  (function f(t){const p=Math.min(1,(t-t0)/1500),e=1-Math.pow(1-p,3);el.textContent=sgn(v*e);if(p<1)requestAnimationFrame(f);else el.textContent=sgn(v);})(t0);}
 const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
 function render(d){
- const om=d.options_monthly,netP=sum(om,x=>x.put),netC=sum(om,x=>x.call),div=sum(d.div_by_month,x=>x.div),int=sum(d.div_by_month,x=>x.interest),wh=sum(d.div_by_month,x=>x.withheld);
+ const om=d.options_monthly,netP=sum(om,x=>x.put),netC=sum(om,x=>x.call),S=d.div_schwab||{},div=S.div,int=S.int,wh=sum(d.div_by_month,x=>x.withheld);
  const Y=d.years||[],aS=sum(Y,x=>x.stocks),aO=sum(Y,x=>x.options),aD=sum(Y,x=>x.divint),aT=aS+aO+aD;
  count($('ytd'),aT);$('hero').innerHTML=[['Stocks','hS',aS],['Options','hO',aO],['Dividends + Interest','hD',aD]].map(([l,id])=>`<div class="card"><div class="l">${l}</div><div class="v" id="${id}"></div></div>`).join('');
  count($('hS'),aS);count($('hO'),aO);count($('hD'),aD);
@@ -64,17 +64,18 @@ const selY=yy=>{document.querySelectorAll('#yrPills .pill').forEach(b=>b.classLi
 $('yrPills').innerHTML='<button class="pill on" data-y="all">All-time</button>'+Y.map(x=>`<button class="pill" data-y="${x.year}">${x.year}${x.year==2026?' YTD':''}</button>`).join('');
 $('yrPills').onclick=e=>{const b=e.target.closest('.pill');if(b)selY(b.dataset.y==='all'?'all':+b.dataset.y);};window.selY=selY; $('notes').innerHTML=d.notes.slice(1).join('<br>');
  const mv=sum(d.positions,x=>x.mv),cost=sum(d.positions,x=>x.cost);
- $('cards2').innerHTML=[['Net puts',netP],['Net calls',netC],['Dividends (gross)',div],['Interest',int],['Tax withheld',wh],['Portfolio value',mv],['Unrealized P/L',mv-cost],['Short put premium open',sum(d.short_puts,x=>x.prem)]]
+ $('cards2').innerHTML=[['Net puts',netP],['Net calls',netC],['Dividends (gross)',div],['Interest',int],['Tax withheld (Jul–Oct)',wh],['Portfolio value',mv],['Unrealized P/L',mv-cost],['Short put premium open',sum(d.short_puts,x=>x.prem)]]
   .map(([l,v])=>`<div class="card"><div class="l">${l}</div><div class="v ${cl(v)}">${fm(v)}</div></div>`).join('');
  const t=d.options_totals;
  table('tOpt',['Month','Contracts Sold','Net Puts','Net Calls','Total'],om.map(x=>[mname(x.month),String(Math.round(x.ct||0)),x.put,x.call,x.put+x.call]),['TOTAL',String(Math.round(sum(om,x=>x.ct||0))),netP,netC,netP+netC]);
  if(d.closed_opts&&d.closed_opts.length){const co=d.closed_opts;$('closedOpts').insertAdjacentHTML('beforeend','<h2>CLOSED OPTIONS 2026 — BY CONTRACT (SCHWAB REALIZED)</h2><div class="scroll" id="tCO"></div>');table('tCO',['Contract','Put/Call','Expiration','Contracts','Proceeds','Cost Basis','Realized G/L','Closed'],co.map(x=>[x.c,x.t,x.exp,String(Math.round(x.ct)),x.pr,x.cb,x.gl,x.cl]),['TOTAL','','',String(Math.round(sum(co,x=>x.ct))),sum(co,x=>x.pr),sum(co,x=>x.cb),sum(co,x=>x.gl),'']);}
  $('tOpt').innerHTML+=`<p class="muted">Put premium sold ${fm(t.put_sold)} · buy-backs ${fm(t.put_bb)} · Call premium sold ${fm(t.call_sold)} · buy-backs ${fm(t.call_bb)}</p>`;
  new Chart($('cOpt'),{type:'bar',data:{labels:om.map(x=>mname(x.month)),datasets:[{label:'Puts',data:om.map(x=>x.put),backgroundColor:'#1e3a8a'},{label:'Calls',data:om.map(x=>x.call),backgroundColor:'#60a5fa'}]}});
- const dm=d.div_by_month;
- table('tDivM',['Month','Dividends','Interest','Withheld','Net'],dm.map(x=>[mname(x.month),x.div,x.interest,x.withheld,x.div+x.interest+x.withheld]),['TOTAL',div,int,wh,div+int+wh]);
- new Chart($('cDiv'),{type:'bar',data:{labels:dm.map(x=>mname(x.month)),datasets:[{label:'Dividends',data:dm.map(x=>x.div),backgroundColor:'#15803d'},{label:'Interest',data:dm.map(x=>x.interest),backgroundColor:'#86efac'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
- table('tDivT',['Ticker','Security','Gross Dividends'],d.div_by_ticker.map(x=>[x.ticker,x.name,x.gross]),['TOTAL','',div]);
+ const dm0=d.div_by_month,dm=[{lab:'Jan–Jun (Schwab, not itemized)',div:S.janjun_div,interest:S.janjun_int,withheld:null}].concat(dm0.map(x=>({lab:mname(x.month),div:x.div+x.interest,interest:0,withheld:x.withheld})));
+ table('tDivM',['Month','Dividends','Interest','Withheld','Net'],dm.map(x=>[x.lab,x.div,x.interest,x.withheld==null?'—':x.withheld,x.div+x.interest+(x.withheld||0)]).concat([['Est. remaining Nov–Dec (Schwab est., not in total)',S.est,0,'—',S.est]]),['TOTAL (Schwab YTD 10/15)',div,int,wh,div+int+wh]);
+ $('tDivM').insertAdjacentHTML('beforeend','<div class="muted" style="font-size:11px;margin-top:6px">Jul–Oct from Plaid; Plaid\'s “interest” there is SWVXX money-market dividends (shown under Dividends; incl. $0.04 cash interest). Jan–Jun = Schwab YTD received − Plaid Jul–Oct. Withholding only itemized Jul–Oct. Est. full-year 2026: '+fm(div+int+S.est)+'.</div>');
+ new Chart($('cDiv'),{type:'bar',data:{labels:dm.map(x=>x.lab.startsWith('Jan')?'Jan–Jun':x.lab).concat(['Nov–Dec est.']),datasets:[{label:'Dividends',data:dm.map(x=>x.div).concat([null]),backgroundColor:'#15803d'},{label:'Interest',data:dm.map(x=>x.interest).concat([null]),backgroundColor:'#86efac'},{label:'Est. remaining',data:dm.map(()=>null).concat([S.est]),backgroundColor:'#cbd5e1'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
+ table('tDivT',['Ticker','Security','Gross Dividends (Jul–Oct, Plaid)'],d.div_by_ticker.map(x=>[x.ticker,x.name,x.gross]),['TOTAL Jul–Oct (excl. SWVXX)','',sum(d.div_by_ticker,x=>x.gross)]);
  const sec={};d.positions.forEach(p=>sec[p.sector]=(sec[p.sector]||0)+p.mv);const se=Object.entries(sec).sort((a,b)=>b[1]-a[1]);
  table('tSec',['Sector','Market Value','%'],se.map(([s,v])=>[s,v,(v/mv*100).toFixed(1)+'%']),['TOTAL',mv,'100%']);
  new Chart($('cSec'),{type:'pie',data:{labels:se.map(x=>x[0]),datasets:[{data:se.map(x=>x[1]),backgroundColor:['#1e3a8a','#2563eb','#60a5fa','#15803d','#86efac','#f59e0b','#b91c1c','#7c3aed','#6b7280','#0891b2']}]},options:{plugins:{legend:{position:'right'}}}});
