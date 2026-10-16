@@ -1,9 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script><script>if(window.Chart){Chart.defaults.color="#d4d4d4";Chart.defaults.borderColor="#262626";Chart.defaults.font.family="Inter";}</script>
 <style>.pills{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}.pill{border:1px solid var(--line);background:#fff;color:var(--txt);border-radius:999px;padding:7px 16px;font:600 13px Inter,system-ui;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.06);transition:all .15s}.pill:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(30,58,138,.18)}.pill.on{background:var(--gold);color:#fff;border-color:var(--gold)}@media(max-width:600px){.pill{padding:6px 12px;font-size:12px}}.byw{display:flex;gap:16px;align-items:flex-start}.byw>.scroll{flex:1 1 auto;min-width:0}.byc{flex:0 0 460px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}@media(max-width:1000px){.byw{flex-direction:column}.byc{flex-basis:auto;width:100%}}
-:root{--bg:#f3f4f6;--line:#d1d5db;--gold:#1e3a8a;--txt:#111827;--muted:#6b7280;--red:#b91c1c;--green:#15803d}
+:root{--bg:#f3f4f6;--line:#d1d5db;--gold:#1e3a8a;--txt:#111827;--muted:#a3a3a3;--red:#e11d2e;--green:#22c55e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px Inter,system-ui,sans-serif}
 h1,h2{font-family:Oswald,sans-serif;letter-spacing:.04em;margin:0;color:var(--gold)}h2{font-size:18px;margin:28px 0 10px}
 .wrap{max-width:1280px;margin:0 auto;padding:0 20px}.top{background:#fff;border-bottom:1px solid var(--line);padding:18px 0}
@@ -20,7 +20,27 @@ td:first-child,th:first-child{text-align:left}.neg{color:var(--red)}.pos{color:v
 #gate form{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center}
 #gate input{font:18px Inter;padding:8px 12px;border:1px solid var(--line);border-radius:8px;width:180px;text-align:center}
 #gate button{margin-left:6px;font:600 15px Inter;padding:9px 16px;border:0;border-radius:8px;background:var(--gold);color:#fff;cursor:pointer}
-</style><style>.sec{position:relative}.sec.drag{opacity:.55;outline:2px dashed var(--gold);border-radius:10px}.hdl{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;display:inline-block;padding:2px 10px;margin-right:6px;color:var(--gold);font-size:20px;vertical-align:middle}.swp{float:right;font-size:12px;border:1px solid #ccd;border-radius:12px;background:#fff;padding:2px 10px;cursor:pointer}#rstL{border:1px solid #ccd;border-radius:14px;background:#fff;padding:4px 12px;font-size:12px;cursor:pointer;margin:10px 0}</style></head><body>
+</style><style>.sec{position:relative}.sec.drag{opacity:.55;outline:2px dashed var(--gold);border-radius:10px}.hdl{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;display:inline-block;padding:2px 10px;margin-right:6px;color:var(--gold);font-size:20px;vertical-align:middle}.swp{float:right;font-size:12px;border:1px solid #ccd;border-radius:12px;background:#fff;padding:2px 10px;cursor:pointer}#rstL{border:1px solid #ccd;border-radius:14px;background:#fff;padding:4px 12px;font-size:12px;cursor:pointer;margin:10px 0}</style><style id="socal">
+:root{--bg:#050505;--line:#262626;--gold:#e8b923;--txt:#f5f5f5;--muted:#a3a3a3;--red:#ff2d3a;--green:#22c55e;--surf:#141414;--surf2:#1c1c1c;--gb:#e8b92347}
+body{background:radial-gradient(1200px 500px at 50% -200px,#e8b9231a,transparent),var(--bg);color:var(--txt)}
+.top{background:linear-gradient(180deg,#0c0c0c,#050505);border-bottom:1px solid var(--gb);box-shadow:0 12px 40px #0000008c;position:relative}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent,#e8b923,transparent)}
+h1{color:var(--gold);text-transform:uppercase;letter-spacing:.08em}h2{color:var(--gold);text-transform:uppercase;letter-spacing:.1em;font-weight:600;border-left:3px solid var(--gold);padding-left:10px}
+.big{color:#f5c518;text-shadow:0 0 18px #e8b92340}
+.card,.chartbox,.byc,#gate form{background:linear-gradient(180deg,#1c1c1c,#141414);border:1px solid var(--gb);border-radius:1rem;box-shadow:0 1px 2px #0000001a;transition:transform .15s,box-shadow .15s}
+.card:hover,.chartbox:hover,.byc:hover{transform:translateY(-2px);box-shadow:0 14px 36px #00000073,0 0 0 1px #e8b923}
+.card .l{color:var(--muted)}.card .v{color:var(--txt)}
+table{background:var(--surf);border:1px solid var(--gb);border-radius:1rem;color:var(--txt)}
+th{background:#0c0c0c;color:var(--gold);text-transform:uppercase;font:600 11px Inter;letter-spacing:.12em;border-bottom:1px solid var(--gold)}
+td{border-bottom:1px solid #202020}tr:nth-child(even) td{background:#0c0c0c66}tr:hover td{background:#e8b92314}
+tr.ft td,tr:last-child td{font-weight:700}
+.pill{background:var(--surf2);color:var(--ink,#d4d4d4);border:1px solid var(--line);box-shadow:none}.pill:hover{border-color:var(--gold);box-shadow:0 0 18px #e8b92355}
+.pill.on{background:linear-gradient(180deg,#f5c518,#e8b923);color:#050505;border-color:#e8b923;box-shadow:0 0 18px #e8b923d9,0 4px 12px #00000080}
+.swp,#rstL{background:var(--surf2);color:var(--gold);border:1px solid var(--gb);border-radius:999px}.swp:hover,#rstL:hover{border-color:var(--gold)}
+#gate{background:var(--bg)}#gate input{background:#0c0c0c;color:var(--txt);border:1px solid var(--gb)}#gate button{background:var(--gold);color:#050505;border-radius:999px;font-weight:700}
+.hdl{color:var(--gold)}.muted{color:var(--muted)}
+#wl .card div[style*="border-bottom"]{border-bottom-color:#262626!important}
+</style></head><body>
 <div id="gate"><form id="f"><h1 style="margin-bottom:14px">Enter password</h1><input id="pw" type="password" inputmode="numeric" autofocus><button>Open</button><div id="err" class="muted" style="margin-top:10px"></div></form></div>
 <div id="app" hidden>
 <div class="top"><div class="wrap"><h1>TRADING INCOME</h1><div class="muted" style="letter-spacing:.18em;font-weight:700;margin-top:8px">ALL-TIME INCOME</div><div class="big" id="ytd" style="font-size:48px"></div><div class="cards" id="hero" style="margin-top:10px"></div><div class="muted" id="fn"></div><div class="muted" id="notes"></div></div></div>
@@ -75,18 +95,18 @@ $('yrPills').onclick=e=>{const b=e.target.closest('.pill');if(b)selY(b.dataset.y
  const dm0=d.div_by_month,dm=[{lab:'Jan–Jun (Schwab, not itemized)',div:S.janjun_div,interest:S.janjun_int,withheld:null}].concat(dm0.map(x=>({lab:mname(x.month),div:x.div+x.interest,interest:0,withheld:x.withheld})));
  table('tDivM',['Month','Dividends','Interest','Withheld','Net'],dm.map(x=>[x.lab,x.div,x.interest,x.withheld==null?'—':x.withheld,x.div+x.interest+(x.withheld||0)]).concat([['Est. remaining Nov–Dec (Schwab est., not in total)',S.est,0,'—',S.est]]),['TOTAL (Schwab YTD 10/15)',div,int,wh,div+int+wh]);
  $('tDivM').insertAdjacentHTML('beforeend','<div class="muted" style="font-size:11px;margin-top:6px">Jul–Oct from Plaid; Plaid\'s “interest” there is SWVXX money-market dividends (shown under Dividends; incl. $0.04 cash interest). Jan–Jun = Schwab YTD received − Plaid Jul–Oct. Withholding only itemized Jul–Oct. Est. full-year 2026: '+fm(div+int+S.est)+'.</div>');
- new Chart($('cDiv'),{type:'bar',data:{labels:dm.map(x=>x.lab.startsWith('Jan')?'Jan–Jun':x.lab).concat(['Nov–Dec est.']),datasets:[{label:'Dividends',data:dm.map(x=>x.div).concat([null]),backgroundColor:'#15803d'},{label:'Interest',data:dm.map(x=>x.interest).concat([null]),backgroundColor:'#86efac'},{label:'Est. remaining',data:dm.map(()=>null).concat([S.est]),backgroundColor:'#cbd5e1'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
+ new Chart($('cDiv'),{type:'bar',data:{labels:dm.map(x=>x.lab.startsWith('Jan')?'Jan–Jun':x.lab).concat(['Nov–Dec est.']),datasets:[{label:'Dividends',data:dm.map(x=>x.div).concat([null]),backgroundColor:'#22c55e'},{label:'Interest',data:dm.map(x=>x.interest).concat([null]),backgroundColor:'#86efac'},{label:'Est. remaining',data:dm.map(()=>null).concat([S.est]),backgroundColor:'#cbd5e1'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
  table('tDivT',['Ticker','Security','Gross Dividends (Jul–Oct, Plaid)'],d.div_by_ticker.map(x=>[x.ticker,x.name,x.gross]),['TOTAL Jul–Oct (excl. SWVXX)','',sum(d.div_by_ticker,x=>x.gross)]);
  const sec={};d.positions.forEach(p=>sec[p.sector]=(sec[p.sector]||0)+p.mv);const se=Object.entries(sec).sort((a,b)=>b[1]-a[1]);
  table('tSec',['Sector','Market Value','%'],se.map(([s,v])=>[s,v,(v/mv*100).toFixed(1)+'%']),['TOTAL',mv,'100%']);
- new Chart($('cSec'),{type:'pie',data:{labels:se.map(x=>x[0]),datasets:[{data:se.map(x=>x[1]),backgroundColor:['#1e3a8a','#2563eb','#60a5fa','#15803d','#86efac','#f59e0b','#b91c1c','#7c3aed','#6b7280','#0891b2']}]},options:{plugins:{legend:{position:'right'}}}});
+ new Chart($('cSec'),{type:'pie',data:{labels:se.map(x=>x[0]),datasets:[{data:se.map(x=>x[1]),backgroundColor:['#1e3a8a','#2563eb','#60a5fa','#22c55e','#86efac','#f59e0b','#e11d2e','#7c3aed','#a3a3a3','#0891b2']}]},options:{plugins:{legend:{position:'right'}}}});
  table('tPos',['Ticker','Sector','Shares','Price','Cost Basis','Market Value','Unrealized P/L','% P/L','% Port'],d.positions.map(p=>[p.ticker,p.sector,p.shares.toLocaleString(),'$'+p.price.toFixed(2),p.cost,p.mv,p.mv-p.cost,((p.mv/p.cost-1)*100).toFixed(1)+'%',(p.mv/mv*100).toFixed(1)+'%']),['TOTAL','','','',cost,mv,mv-cost,((mv/cost-1)*100).toFixed(1)+'%','100%']);
  if(d.cash!=null)$('tPos').innerHTML+=`<p class="muted">Cash balance: ${fm(d.cash)}</p>`;
  const sp=d.short_puts;
  table('tSP',['Contract','Expiration','Contracts','Mark','Premium','Cost to Close','Unrealized P/L','Cash Secured'],sp.map(x=>[x.contract,x.exp,String(Math.round(x.ct)),'$'+x.mark.toFixed(2),x.prem,x.close,x.prem-x.close,x.secured]),['TOTAL','',String(Math.round(sum(sp,x=>x.ct))),'',sum(sp,x=>x.prem),sum(sp,x=>x.close),sum(sp,x=>x.prem-x.close),sum(sp,x=>x.secured)]);
 
  $('gen').textContent='Updated '+d.generated;}
-function rbar(D,sel){const W=440,H=330,P=8,mx=Math.max(...D.map(x=>Math.abs(x.val)),1),bw=(W-2*P)/D.length,z=H/2,sc=(H/2-40)/mx,f=v=>(v<0?'-':'')+'$'+Math.round(Math.abs(v)).toLocaleString();let s=`<div class="scroll"><svg id="rchart" viewBox="0 0 ${W} ${H}" style="width:100%;font:11px system-ui"><line x1="${P}" x2="${W-P}" y1="${z}" y2="${z}" stroke="var(--muted)"/>`;D.forEach((x,i)=>{const h=Math.abs(x.val)*sc,X=P+i*bw+bw*.15,w=bw*.7,y=x.val>=0?z-h:z,c=x.val>=0?'#15803d':'var(--red)',op=(sel&&sel!==x.year)?.25:1;s+=`<rect x="${X}" y="${y}" width="${w}" height="${Math.max(h,1)}" fill="${c}" opacity="${op}" rx="2"/><text x="${X+w/2}" y="${x.val>=0?y-5:y+h+14}" text-anchor="middle" fill="var(--txt)">${f(x.val)}</text><text x="${X+w/2}" y="${H-6}" text-anchor="middle" fill="var(--muted)">${x.year}${x.ytd?' YTD':''}</text>`;});return s+'</svg></div>';}
+function rbar(D,sel){const W=440,H=330,P=8,mx=Math.max(...D.map(x=>Math.abs(x.val)),1),bw=(W-2*P)/D.length,z=H/2,sc=(H/2-40)/mx,f=v=>(v<0?'-':'')+'$'+Math.round(Math.abs(v)).toLocaleString();let s=`<div class="scroll"><svg id="rchart" viewBox="0 0 ${W} ${H}" style="width:100%;font:11px system-ui"><line x1="${P}" x2="${W-P}" y1="${z}" y2="${z}" stroke="var(--muted)"/>`;D.forEach((x,i)=>{const h=Math.abs(x.val)*sc,X=P+i*bw+bw*.15,w=bw*.7,y=x.val>=0?z-h:z,c=x.val>=0?'#22c55e':'var(--red)',op=(sel&&sel!==x.year)?.25:1;s+=`<rect x="${X}" y="${y}" width="${w}" height="${Math.max(h,1)}" fill="${c}" opacity="${op}" rx="2"/><text x="${X+w/2}" y="${x.val>=0?y-5:y+h+14}" text-anchor="middle" fill="var(--txt)">${f(x.val)}</text><text x="${X+w/2}" y="${H-6}" text-anchor="middle" fill="var(--muted)">${x.year}${x.ytd?' YTD':''}</text>`;});return s+'</svg></div>';}
 $('f').onsubmit=async e=>{e.preventDefault();try{const d=await decrypt($('pw').value);sessionStorage.setItem('tp',$('pw').value);$('gate').remove();$('app').hidden=false;render(d);}catch(x){$('err').textContent='Wrong password';}};
 if(sessionStorage.getItem('tp')){$('pw').value=sessionStorage.getItem('tp');$('f').requestSubmit();}
 </script><script>
