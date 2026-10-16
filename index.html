@@ -30,7 +30,7 @@ td:first-child,th:first-child{text-align:left}.neg{color:var(--red)}.pos{color:v
 <h2>2026 SUMMARY</h2><div class="cards" id="cards2"></div>
 <h2>OPEN POSITIONS</h2><div class="scroll" id="tPos"></div>
 <h2>OPEN SHORT PUTS</h2><div class="scroll" id="tSP"></div>
-<h2>OPTIONS — PUTS VS CALLS BY MONTH</h2><div class="grid2"><div class="chartbox"><canvas id="cOpt"></canvas></div><div class="scroll" id="tOpt"></div></div>
+<h2>TOP WINNERS &amp; LOSERS 2026 (REALIZED)</h2><div class="grid2" id="wl"></div><h2>OPTIONS — PUTS VS CALLS BY MONTH</h2><div class="grid2"><div class="chartbox"><canvas id="cOpt"></canvas></div><div class="scroll" id="tOpt"></div></div>
 <h2>OPEN POSITIONS — BY SECTOR</h2><div class="grid2"><div class="chartbox"><canvas id="cSec"></canvas></div><div class="scroll" id="tSec"></div></div>
 <h2>DIVIDENDS</h2><div class="grid2"><div class="chartbox"><canvas id="cDiv"></canvas></div><div class="scroll" id="tDivM"></div></div>
 <div class="scroll" id="tDivT" style="margin-top:14px"></div>
@@ -71,6 +71,7 @@ $('yrPills').onclick=e=>{const b=e.target.closest('.pill');if(b)selY(b.dataset.y
  if(d.closed_opts&&d.closed_opts.length){const co=d.closed_opts;$('closedOpts').insertAdjacentHTML('beforeend','<h2>CLOSED OPTIONS 2026 — BY CONTRACT (SCHWAB REALIZED)</h2><div class="scroll" id="tCO"></div>');table('tCO',['Contract','Put/Call','Expiration','Contracts','Proceeds','Cost Basis','Realized G/L','Closed'],co.map(x=>[x.c,x.t,x.exp,String(Math.round(x.ct)),x.pr,x.cb,x.gl,x.cl]),['TOTAL','','',String(Math.round(sum(co,x=>x.ct))),sum(co,x=>x.pr),sum(co,x=>x.cb),sum(co,x=>x.gl),'']);}
  $('tOpt').innerHTML+=`<p class="muted">Put premium sold ${fm(t.put_sold)} · buy-backs ${fm(t.put_bb)} · Call premium sold ${fm(t.call_sold)} · buy-backs ${fm(t.call_bb)}</p>`;
  new Chart($('cOpt'),{type:'bar',data:{labels:om.map(x=>mname(x.month)),datasets:[{label:'Puts',data:om.map(x=>x.put),backgroundColor:'#1e3a8a'},{label:'Calls',data:om.map(x=>x.call),backgroundColor:'#60a5fa'}]}});
+ if(d.top_wl){const T=d.top_wl,bx=(t,a)=>`<div class="card" style="border-radius:14px;padding:14px"><div class="l">${t}</div>${a.map((x,i)=>`<div style="display:flex;justify-content:space-between;font:600 16px Inter;padding:6px 0;border-bottom:1px solid #eef"><span>${i+1}. ${x[0]}</span><span class="${cl(x[1])}">${sgn(x[1])}</span></div>`).join('')}</div>`;$('wl').innerHTML=bx('Top 3 Winners '+T.year,T.win)+bx('Top 3 Losers '+T.year,T.lose);}
  const dm0=d.div_by_month,dm=[{lab:'Jan–Jun (Schwab, not itemized)',div:S.janjun_div,interest:S.janjun_int,withheld:null}].concat(dm0.map(x=>({lab:mname(x.month),div:x.div+x.interest,interest:0,withheld:x.withheld})));
  table('tDivM',['Month','Dividends','Interest','Withheld','Net'],dm.map(x=>[x.lab,x.div,x.interest,x.withheld==null?'—':x.withheld,x.div+x.interest+(x.withheld||0)]).concat([['Est. remaining Nov–Dec (Schwab est., not in total)',S.est,0,'—',S.est]]),['TOTAL (Schwab YTD 10/15)',div,int,wh,div+int+wh]);
  $('tDivM').insertAdjacentHTML('beforeend','<div class="muted" style="font-size:11px;margin-top:6px">Jul–Oct from Plaid; Plaid\'s “interest” there is SWVXX money-market dividends (shown under Dividends; incl. $0.04 cash interest). Jan–Jun = Schwab YTD received − Plaid Jul–Oct. Withholding only itemized Jul–Oct. Est. full-year 2026: '+fm(div+int+S.est)+'.</div>');
