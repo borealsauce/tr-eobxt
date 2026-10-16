@@ -54,6 +54,7 @@ tr.ft td,tr:last-child td{font-weight:700}
 <h2>OPEN POSITIONS — BY SECTOR</h2><div class="grid2"><div class="chartbox"><canvas id="cSec"></canvas></div><div class="scroll" id="tSec"></div></div>
 <h2>DIVIDENDS</h2><div class="grid2"><div class="chartbox"><canvas id="cDiv"></canvas></div><div class="scroll" id="tDivM"></div></div>
 <div class="scroll" id="tDivT" style="margin-top:14px"></div>
+<h2>COMMON STOCKS — ANNUAL GAINS/LOSSES</h2><div class="byw"><div class="scroll" id="tStkY"></div><div class="byc" id="stkChart"></div></div><h3 style="font:600 13px Oswald;letter-spacing:.1em;color:var(--gold);margin:16px 0 8px">2026 CLOSED STOCK TRADES BY TICKER (SCHWAB)</h3><div class="scroll" id="tStkT"></div>
 <div id="closedOpts"></div>
 <div id="years"></div><p class="muted" id="gen"></p>
 </main></div>
@@ -92,6 +93,10 @@ $('yrPills').onclick=e=>{const b=e.target.closest('.pill');if(b)selY(b.dataset.y
  $('tOpt').innerHTML+=`<p class="muted">Put premium sold ${fm(t.put_sold)} · buy-backs ${fm(t.put_bb)} · Call premium sold ${fm(t.call_sold)} · buy-backs ${fm(t.call_bb)}</p>`;
  new Chart($('cOpt'),{type:'bar',data:{labels:om.map(x=>mname(x.month)),datasets:[{label:'Puts',data:om.map(x=>x.put),backgroundColor:'#1e3a8a'},{label:'Calls',data:om.map(x=>x.call),backgroundColor:'#60a5fa'}]}});
  if(d.top_wl){const T=d.top_wl,bx=(t,a)=>`<div class="card" style="border-radius:14px;padding:14px"><div class="l">${t}</div>${a.map((x,i)=>`<div style="display:flex;justify-content:space-between;font:600 16px Inter;padding:6px 0;border-bottom:1px solid #eef"><span>${i+1}. ${x[0]}</span><span class="${cl(x[1])}">${sgn(x[1])}</span></div>`).join('')}</div>`;$('wl').innerHTML=bx('Top 3 Winners '+T.year,T.win)+bx('Top 3 Losers '+T.year,T.lose);}
+ if(d.stocks_annual){const A=d.stocks_annual,tv=x=>x.st==null&&x.lt==null?null:(x.st||0)+(x.lt||0),aS=sum(A,x=>x.st||0),aL=sum(A,x=>x.lt||0);
+  table('tStkY',['Year','Short-Term','Long-Term','Total Stock G/L','Source'],A.map(x=>[String(x.year),x.st==null?'—':x.st,x.lt==null?'—':x.lt,tv(x)==null?'—':tv(x),x.note||'']),['ALL-TIME',aS,aL,aS+aL,'']);
+  const ch=A.filter(x=>tv(x)!=null).map(x=>({year:x.year,val:tv(x)}));$('stkChart').innerHTML='<h3 style="margin:0 0 6px;font-size:13px;color:var(--muted)">STOCK REALIZED G/L BY YEAR</h3>'+rbar(ch,null);
+  const T=d.stocks_2026;table('tStkT',['Ticker','Name','Lots','Short-Term','Long-Term','Realized G/L'],T.map(x=>[x.t,x.n,String(x.lots),x.st,x.lt,x.gl]),['TOTAL','',String(sum(T,x=>x.lots)),sum(T,x=>x.st),sum(T,x=>x.lt),sum(T,x=>x.gl)]);}
  const dm0=d.div_by_month,dm=[{lab:'Jan–Jun (Schwab, not itemized)',div:S.janjun_div,interest:S.janjun_int,withheld:null}].concat(dm0.map(x=>({lab:mname(x.month),div:x.div+x.interest,interest:0,withheld:x.withheld})));
  table('tDivM',['Month','Dividends','Interest','Withheld','Net'],dm.map(x=>[x.lab,x.div,x.interest,x.withheld==null?'—':x.withheld,x.div+x.interest+(x.withheld||0)]).concat([['Est. remaining Nov–Dec (Schwab est., not in total)',S.est,0,'—',S.est]]),['TOTAL (Schwab YTD 10/15)',div,int,wh,div+int+wh]);
  $('tDivM').insertAdjacentHTML('beforeend','<div class="muted" style="font-size:11px;margin-top:6px">Jul–Oct from Plaid; Plaid\'s “interest” there is SWVXX money-market dividends (shown under Dividends; incl. $0.04 cash interest). Jan–Jun = Schwab YTD received − Plaid Jul–Oct. Withholding only itemized Jul–Oct. Est. full-year 2026: '+fm(div+int+S.est)+'.</div>');
