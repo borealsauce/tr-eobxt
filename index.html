@@ -20,7 +20,7 @@ td:first-child,th:first-child{text-align:left}.neg{color:var(--red)}.pos{color:v
 #gate form{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;text-align:center}
 #gate input{font:18px Inter;padding:8px 12px;border:1px solid var(--line);border-radius:8px;width:180px;text-align:center}
 #gate button{margin-left:6px;font:600 15px Inter;padding:9px 16px;border:0;border-radius:8px;background:var(--gold);color:#fff;cursor:pointer}
-</style></head><body>
+</style><style>.sec{position:relative}.sec.drag{opacity:.55;outline:2px dashed var(--gold);border-radius:10px}.hdl{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;display:inline-block;padding:2px 10px;margin-right:6px;color:var(--gold);font-size:20px;vertical-align:middle}.swp{float:right;font-size:12px;border:1px solid #ccd;border-radius:12px;background:#fff;padding:2px 10px;cursor:pointer}#rstL{border:1px solid #ccd;border-radius:14px;background:#fff;padding:4px 12px;font-size:12px;cursor:pointer;margin:10px 0}</style></head><body>
 <div id="gate"><form id="f"><h1 style="margin-bottom:14px">Enter password</h1><input id="pw" type="password" inputmode="numeric" autofocus><button>Open</button><div id="err" class="muted" style="margin-top:10px"></div></form></div>
 <div id="app" hidden>
 <div class="top"><div class="wrap"><h1>TRADING INCOME</h1><div class="muted" style="letter-spacing:.18em;font-weight:700;margin-top:8px">ALL-TIME INCOME</div><div class="big" id="ytd" style="font-size:48px"></div><div class="cards" id="hero" style="margin-top:10px"></div><div class="muted" id="fn"></div><div class="muted" id="notes"></div></div></div>
@@ -91,4 +91,26 @@ if(sessionStorage.getItem('tp')){$('pw').value=sessionStorage.getItem('tp');$('f
 (function(){const pv=t=>{t=t.replace(/[▲▼]/g,'').trim();if(t===''||t==='—')return null;const n=t.replace(/[$,%+\s]/g,'').replace(/^\((.*)\)$/,'-$1');if(/^-?\d*\.?\d+$/.test(n))return{n:parseFloat(n)};const d=Date.parse(t);if(/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(t)&&!isNaN(d))return{n:d};return{s:t.toLowerCase()};};
 document.addEventListener('click',e=>{const th=e.target.closest('th');if(!th)return;const tb=th.closest('table'),hr=th.parentElement,ci=[...hr.children].indexOf(th);const rows=[...tb.querySelectorAll('tr')].filter(r=>r!==hr&&!r.classList.contains('ft')&&!/^(TOTAL|ALL-TIME)/i.test(r.children[0]?.textContent||'')&&r.querySelector('td'));const ft=[...tb.querySelectorAll('tr')].filter(r=>r.classList.contains('ft')||/^(TOTAL|ALL-TIME)/i.test(r.children[0]?.textContent||''));const dir=th.dataset.dir==='asc'?'desc':'asc';hr.querySelectorAll('th').forEach(x=>{delete x.dataset.dir;x.textContent=x.textContent.replace(/ [▲▼]$/,'');});th.dataset.dir=dir;th.textContent+=dir==='asc'?' ▲':' ▼';const m=dir==='asc'?1:-1;rows.sort((a,b)=>{const A=pv(a.children[ci]?.textContent||''),B=pv(b.children[ci]?.textContent||'');if(!A&&!B)return 0;if(!A)return 1;if(!B)return -1;if(A.n!=null&&B.n!=null)return (A.n-B.n)*m;return String(A.s??A.n).localeCompare(String(B.s??B.n))*m;});const par=rows[0]?.parentElement||tb;rows.forEach(r=>par.appendChild(r));ft.forEach(r=>r.parentElement.appendChild(r));});
 const st=document.createElement('style');st.textContent='th{cursor:pointer;user-select:none}th:hover{text-decoration:underline}';document.head.appendChild(st);})();
-</script></body></html>
+</script><script>(function(){
+const K='tr_layout_v1',KS='tr_swap_v1';
+function setup(){const m=document.querySelector('main');if(m.dataset.dd)return;m.dataset.dd=1;
+ const co=document.getElementById('closedOpts');if(co){while(co.firstChild)m.insertBefore(co.firstChild,co);co.remove();}
+ const hs=[...m.children].filter(e=>e.tagName==='H2');const secs=[];
+ hs.forEach(h=>{const s=document.createElement('section');s.className='sec';s.dataset.id=h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');m.insertBefore(s,h);let n=h;while(n&&!(n!==h&&n.tagName==='H2')&&n.id!=='years'&&n.id!=='gen'){const x=n.nextElementSibling;s.appendChild(n);n=x;}secs.push(s);
+  const hd=document.createElement('span');hd.className='hdl';hd.textContent='≡';hd.title='Drag to move';h.prepend(hd);
+  s.querySelectorAll('.grid2').forEach((g,i)=>{const b=document.createElement('button');b.className='swp';b.textContent='⇄ swap';b.onclick=()=>{g.prepend(g.lastElementChild);const sw=JSON.parse(localStorage.getItem(KS)||'{}');sw[s.dataset.id+i]=!sw[s.dataset.id+i];localStorage.setItem(KS,JSON.stringify(sw));};h.appendChild(b);});});
+ const first=secs[0];const r=document.createElement('button');r.id='rstL';r.textContent='Reset layout';r.onclick=()=>{localStorage.removeItem(K);localStorage.removeItem(KS);location.reload();};m.insertBefore(r,first);
+ const def=secs.map(s=>s.dataset.id);
+ const sw=JSON.parse(localStorage.getItem(KS)||'{}');secs.forEach(s=>s.querySelectorAll('.grid2').forEach((g,i)=>{if(sw[s.dataset.id+i])g.prepend(g.lastElementChild);}));
+ const ord=JSON.parse(localStorage.getItem(K)||'null');if(ord){const anchor=secs[secs.length-1].nextSibling;ord.concat(def.filter(x=>!ord.includes(x))).forEach(id=>{const s=secs.find(z=>z.dataset.id===id);if(s)m.insertBefore(s,anchor);});}
+ const save=()=>localStorage.setItem(K,JSON.stringify([...m.querySelectorAll(':scope>section.sec')].map(s=>s.dataset.id)));
+ let cur=null;
+ m.addEventListener('pointerdown',e=>{const hd=e.target.closest('.hdl');if(!hd)return;e.preventDefault();cur=hd.closest('section');cur.classList.add('drag');hd.setPointerCapture(e.pointerId);});
+ m.addEventListener('pointermove',e=>{if(!cur)return;e.preventDefault();const y=e.clientY;
+  for(const s of m.querySelectorAll(':scope>section.sec')){if(s===cur)continue;const b=s.getBoundingClientRect();if(y>b.top&&y<b.bottom){if(y<b.top+b.height/2)m.insertBefore(cur,s);else m.insertBefore(cur,s.nextSibling);break;}}
+  if(y<40)scrollBy(0,-15);if(y>innerHeight-40)scrollBy(0,15);});
+ const end=()=>{if(!cur)return;cur.classList.remove('drag');cur=null;save();};
+ m.addEventListener('pointerup',end);m.addEventListener('pointercancel',end);
+ window.__resetLayout=r.onclick;}
+const iv=setInterval(()=>{const a=document.getElementById('app');if(a&&!a.hidden&&document.querySelector('#tPos tr')){clearInterval(iv);setTimeout(setup,50);}},200);
+})();</script></body></html>
